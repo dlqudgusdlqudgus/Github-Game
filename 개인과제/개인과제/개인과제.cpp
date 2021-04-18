@@ -4,13 +4,14 @@
 #include<stdio.h>
 
 SceneID scene0, scene1, scene2;
-ObjectID object1, gameStart, gameHow, back, showScore, gameTitle, restart, gamestop;
+ObjectID object1, gameStart, gameHow, back, gameTitle, restart, gamestop;
 ObjectID obstacle;
 TimerID timer1, timer2, gameScore;
 
 int puX = 150, puY = 200, jcount = 0;
 int obX = 1280, obY = 215;
 int score = 0, puWalk = 1, obsType=1;
+char showScore[50] = {};
 
 bool jumpT = false, gamePlay = false, puSlide = false;
 
@@ -39,9 +40,10 @@ void checkCrashed() {
 	}
 
 	if (0) {
-		stop:
-		
-		printf("!");
+	stop:
+
+		sprintf_s(showScore, "%d개의 F학점을 피했다~!", score);
+		showMessage(showScore);
 
 		gamePlay = false;
 		showObject(restart);
@@ -67,9 +69,6 @@ void gameStartSetting() {
 	locateObject(obstacle, scene1, obX, obY);
 	locateObject(object1, scene1, puX, puY);
 
-	setTimer(gameScore, 0.0f);							//게임점수 초기화
-	showTimer(gameScore);
-
 	startTimer(timer1);									// 게임시작
 	startTimer(timer2);
 
@@ -90,11 +89,11 @@ void locateObject(ObjectID object, SceneID scene, int x, int y, bool shown) {
 void jump_move() {									// 점프
 
 	if (jcount >= 0 && jcount < 12) {
-		puY += 10;
+		puY += 12;
 		jcount++;
 	}
 	else if (jcount>=12 && jcount < 24) {
-		puY -= 10;
+		puY -= 12;
 		jcount++;
 	}
 	else if (jcount == 24) {
@@ -105,11 +104,14 @@ void jump_move() {									// 점프
 
 void moveObstacle() {
 
-	if (score < 3) {
+	if (score < 10) {
 		obX -= 10;
 	}
-	else if (score >= 3) {
+	else if (score >= 10 && score < 40) {
 		obX -= 15;
+	}
+	else if (score >= 40) {
+		obX -= 25;
 	}
 
 	if (obsType == 1) {
@@ -122,7 +124,7 @@ void moveObstacle() {
 	}
 	else if (obsType == 2) {
 
-		obY = 310;
+		obY = 305;
 
 		setObjectImage(obstacle, "obstacle2.png");
 		locateObject(obstacle, scene1, obX, obY);
@@ -173,11 +175,10 @@ void timerCallBack(TimerID timer) {
 			checkCrashed();
 
 			if (obX <= 0) {
-				increaseTimer(gameScore, 1.0f);
+				score++;
 
 				obsType = rand() % 2 + 1;
 
-				score++;
 				obX = 1280;
 			}
 
@@ -230,7 +231,6 @@ int main() {
 	gameStart = createObject("게임시작.jpg");
 	gameHow = createObject("게임방법.jpg");
 	back = createObject("뒤로.jpg");
-	showScore = createObject("점수.jpg");
 	gameTitle = createObject("게임제목.jpg");
 	restart = createObject("재시작.jpg");
 	gamestop = createObject("게임멈춰.jpg");
@@ -238,7 +238,6 @@ int main() {
 
 	timer1 = createTimer(0.0001f);	
 	timer2 = createTimer(0.001f);
-	gameScore = createTimer(0.0f);
 	
 	locateObject(gameTitle, scene0, 240, 400, true);
 	locateObject(gameStart, scene0, 575, 300, true);
@@ -246,9 +245,8 @@ int main() {
 
 	locateObject(object1, scene1, puX, puY, true);
 	locateObject(obstacle, scene1, obX, obY, true);
-	locateObject(showScore, scene1, 500, 630, true);
-	locateObject(restart, scene1, 575, 200);
-	locateObject(gamestop, scene1, 575, 100);
+	locateObject(restart, scene1, 575, 550);
+	locateObject(gamestop, scene1, 575, 400);
 
 	locateObject(back, scene2, 0, 0, true);
 
